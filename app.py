@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import requests
 
 app = Flask(__name__)
 
@@ -19,20 +20,24 @@ def visitors():
     counter_write_file.close()
 
     # Render HTML with count variable
-    return render_template("index.html", count=visitors_count)
+    return render_template("index.html", count = visitors_count)
 
-@app.route('/', methods=['POST'])
-def covid_stats():
+@app.route('/', methods = ['POST'])
+def weather_stats():
     # Load current count
     counter_read_file = open("count.txt", "r")
     visitors_count = int(counter_read_file.read())
     counter_read_file.close()
 
-    text = request.form['text']
+    latitude = request.form['latitude']
+    longitude = request.form['longitude']
 
-    corona_data = 'https://corona.dnsforfamily.com/graph.png?c='+text
-    print(corona_data)
-    return render_template("index.html", image=corona_data, count=visitors_count)
+    api_url = 'https://weather-l6tl.onrender.com/api/getCurrentWeather/' + latitude + '/' + longitude
+
+    response = requests.get(api_url)
+    weather_data = response.json()
+    print(weather_data)
+    return render_template("index.html", weather = weather_data, count = visitors_count)
 
 if __name__ == "__main__":
     app.run()
